@@ -1,1 +1,1 @@
-web: gunicorn "mysite:create_app('prod')"
+web: flask init-db && flask run 
