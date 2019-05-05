@@ -7,6 +7,7 @@ from flaskr.auth import login_required
 from flaskr.db import get_db
 
 import datetime
+from bson import ObjectId
 
 bp = Blueprint('blog', __name__)
 
@@ -14,6 +15,13 @@ bp = Blueprint('blog', __name__)
 @bp.route('/')
 def index():
     db = get_db()
+    for post in db.posts.find({}):
+        pidStr = post.get('id')
+        if not pidStr:
+            pid = post.get('_id')
+            pidStr = str(post.get('_id'))
+            db.posts.update({'_id': pid}, {'$set': {'id': pidStr}})
+            
     posts = db.posts.find({'$query': {}, '$orderby': {'created': -1}})
     return render_template('blog/index.html', posts=posts)
 
@@ -56,9 +64,10 @@ def get_post(id, check_author=True):
 
     return post
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@bp.route('/<string:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
+    id = ObjectId(id)
     post = get_post(id)
 
     if request.method == 'POST':
@@ -80,9 +89,10 @@ def update(id):
 
     return render_template('blog/update.html', post=post)
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@bp.route('/<string:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
+    id = ObjectId(id)
     get_post(id)
     db = get_db()
     db.posts.delete_one({'_id': id})
