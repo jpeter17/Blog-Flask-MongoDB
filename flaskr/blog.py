@@ -14,7 +14,7 @@ bp = Blueprint('blog', __name__)
 @bp.route('/')
 def index():
     db = get_db()
-    posts = db.posts.find({})
+    posts = db.posts.find({'$query': {}, '$orderby': {'created': -1}})
     return render_template('blog/index.html', posts=posts)
 
 @bp.route('/create', methods=('GET', 'POST'))
