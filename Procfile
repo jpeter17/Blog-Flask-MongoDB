@@ -1,1 +1,1 @@
-web: flask init-db && flask run 
+web: flask run
